@@ -1,4 +1,4 @@
-const POKEMON = ["pikachu", "charizard", "bulbasaur", "squirtle", "gengar", "lucario", "mewtwo", "greninja"];
+const POKEMON = ["pikachu", "charizard", "bulbasaur", "mewtwo", "greninja"];
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon/";
 
@@ -116,6 +116,7 @@ function consultasEnWorkers(modo) {
                     log(`Worker terminó la consulta de ${nombre}.`, "exito");
                     resolve(event.data.resultado);
                 } else {
+                    log(`Error consultando ${nombre}: ${event.data.error}`, "error");
                     reject(new Error(event.data.error));
                 }
             };
