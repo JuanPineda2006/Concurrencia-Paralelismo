@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demostración de concurrencia y paralelismo</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0001;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .resultado {
+            font-weight: bold;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Concurrencia y paralelismo</h1>
+
+    <div class="card">
+        <h2>1. Ejecución secuencial</h2>
+        <p>Cuatro tareas esperan un segundo cada una, una después de otra.</p>
+        <button onclick="secuencial()">Ejecutar</button>
+        <div id="resultadoSecuencial" class="resultado"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. Ejecución concurrente</h2>
+        <p>Cuatro tareas esperan un segundo simultáneamente.</p>
+        <button onclick="concurrente()">Ejecutar</button>
+        <div id="resultadoConcurrente" class="resultado"></div>
+    </div>
+
+    <div class="card">
+        <h2>3. Ejecución en paralelo</h2>
+        <p>Cuatro trabajadores realizan cálculos intensivos
+           al mismo tiempo, si el equipo dispone de recursos suficientes.</p>
+        <button onclick="paralelo()">Ejecutar</button>
+        <div id="resultadoParalelo" class="resultado"></div>
+    </div>
+
+    <script>
+        // Simula una tarea que tarda un segundo.
+        function tareaDeEspera() {
+            return new Promise(resolve => {
+                setTimeout(resolve, 1000);
+            });
+        }
+
+        // 1. SECUENCIAL
+        async function secuencial() {
+            const salida = document.getElementById("resultadoSecuencial");
+            salida.textContent = "Ejecutando...";
+
+            const inicio = performance.now();
+
+            for (let i = 0; i < 4; i++) {
+                await tareaDeEspera();
+            }
+
+            const tiempo = (performance.now() - inicio) / 1000;
+            salida.textContent = `Tiempo total: ${tiempo.toFixed(2)} segundos`;
+        }
+
+        // 2. CONCURRENCIA
+        async function concurrente() {
+            const salida = document.getElementById("resultadoConcurrente");
+            salida.textContent = "Ejecutando...";
+
+            const inicio = performance.now();
+
+            await Promise.all([
+                tareaDeEspera(),
+                tareaDeEspera(),
+                tareaDeEspera(),
+                tareaDeEspera()
+            ]);
+
+            const tiempo = (performance.now() - inicio) / 1000;
+            salida.textContent = `Tiempo total: ${tiempo.toFixed(2)} segundos`;
+        }
+
+        // Código que ejecutará cada trabajador paralelo.
+        const codigoTrabajador = `
+            self.onmessage = function(event) {
+                const iteraciones = event.data;
+                let resultado = 0;
+
+                for (let i = 0; i < iteraciones; i++) {
+                    resultado += Math.sqrt(i);
+                }
+
+                self.postMessage(resultado);
+            };
+        `;
+
+        // 3. PARALELISMO CON WEB WORKERS
+        async function paralelo() {
+            const salida = document.getElementById("resultadoParalelo");
+            salida.textContent = "Ejecutando cálculos...";
+
+            const inicio = performance.now();
+            const cantidad = 4;
+            const iteraciones = 10_000_000;
+
+            const blob = new Blob(
+                [codigoTrabajador],
+                { type: "text/javascript" }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const trabajadores = [];
+
+            try {
+                const tareas = Array.from({ length: cantidad }, () => {
+                    return new Promise((resolve, reject) => {
+                        const trabajador = new Worker(url);
+                        trabajadores.push(trabajador);
+
+                        trabajador.onmessage = event => {
+                            trabajador.terminate();
+                            resolve(event.data);
+                        };
+
+                        trabajador.onerror = error => {
+                            trabajador.terminate();
+                            reject(error);
+                        };
+
+                        trabajador.postMessage(iteraciones);
+                    });
+                });
+
+                await Promise.all(tareas);
+
+                const tiempo = (performance.now() - inicio) / 1000;
+
+                salida.textContent =
+                    `Cuatro cálculos completados en ${tiempo.toFixed(2)} segundos.`;
+            } catch (error) {
+                salida.textContent =
+                    "No se pudo completar la prueba: " + error.message;
+            } finally {
+                trabajadores.forEach(trabajador => trabajador.terminate());
+                URL.revokeObjectURL(url);
+            }
+        }
+    </script>
+
+</body>
+</html>
