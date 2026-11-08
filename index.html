@@ -3,176 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demostración de concurrencia y paralelismo</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: #f4f6f8;
-            color: #222;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #0001;
-        }
-
-        button {
-            padding: 10px 15px;
-            margin: 5px 0;
-            cursor: pointer;
-        }
-
-        .resultado {
-            font-weight: bold;
-            margin-top: 12px;
-        }
-    </style>
+    <title>Concurrencia y Paralelismo</title>
+    <link rel="stylesheet" href="css/estilos.css">
 </head>
-
 <body>
 
-    <h1>Concurrencia y paralelismo</h1>
+    <header>
+        <h1>Concurrencia y Paralelismo</h1>
+        <p>Comparación de ejecución secuencial, concurrente y paralela con JavaScript.</p>
+    </header>
 
-    <div class="card">
-        <h2>1. Ejecución secuencial</h2>
-        <p>Cuatro tareas esperan un segundo cada una, una después de otra.</p>
-        <button onclick="secuencial()">Ejecutar</button>
-        <div id="resultadoSecuencial" class="resultado"></div>
-    </div>
+    <main>
+        <section class="introduccion">
+            <h2>¿Qué vamos a comparar?</h2>
+            <p>
+                Ejecutaremos dos tipos de tareas: consultas a una API externa
+                y cálculos matemáticos que consumen tiempo de procesamiento.
+            </p>
+        </section>
 
-    <div class="card">
-        <h2>2. Ejecución concurrente</h2>
-        <p>Cuatro tareas esperan un segundo simultáneamente.</p>
-        <button onclick="concurrente()">Ejecutar</button>
-        <div id="resultadoConcurrente" class="resultado"></div>
-    </div>
+        <section class="contenedor">
+            <!-- EJECUCIÓN SECUENCIAL -->
+            <article class="tarjeta secuencial">
+                <h2>1. Secuencial</h2>
+                <p>Las tareas se realizan una después de otra.</p>
 
-    <div class="card">
-        <h2>3. Ejecución en paralelo</h2>
-        <p>Cuatro trabajadores realizan cálculos intensivos
-           al mismo tiempo, si el equipo dispone de recursos suficientes.</p>
-        <button onclick="paralelo()">Ejecutar</button>
-        <div id="resultadoParalelo" class="resultado"></div>
-    </div>
+                <button id="btn-secuencial"
+                        onclick="ejecutarSecuencial()">
+                    Ejecutar secuencial
+                </button>
 
-    <script>
-        // Simula una tarea que tarda un segundo.
-        function tareaDeEspera() {
-            return new Promise(resolve => {
-                setTimeout(resolve, 1000);
-            });
-        }
+                <p id="status-secuencial" class="estado">Esperando...</p>
 
-        // 1. SECUENCIAL
-        async function secuencial() {
-            const salida = document.getElementById("resultadoSecuencial");
-            salida.textContent = "Ejecutando...";
+                <h3>Progreso</h3>
+                <div class="barra-fondo">
+                    <div id="bar-secuencial" class="barra"></div>
+                </div>
 
-            const inicio = performance.now();
+                <p>Consultas a la API: <span id="net-secuencial">0%</span></p>
+                <p>Cálculos matemáticos: <span id="cpu-secuencial">0%</span></p>
+            </article>
 
-            for (let i = 0; i < 4; i++) {
-                await tareaDeEspera();
-            }
+            <!-- EJECUCIÓN CONCURRENTE -->
+            <article class="tarjeta concurrente">
+                <h2>2. Concurrente</h2>
+                <p>Las consultas de red se inician juntas mientras se ejecutan los cálculos.</p>
 
-            const tiempo = (performance.now() - inicio) / 1000;
-            salida.textContent = `Tiempo total: ${tiempo.toFixed(2)} segundos`;
-        }
+                <button id="btn-concurrente"
+                        onclick="ejecutarConcurrente()">
+                    Ejecutar concurrente
+                </button>
 
-        // 2. CONCURRENCIA
-        async function concurrente() {
-            const salida = document.getElementById("resultadoConcurrente");
-            salida.textContent = "Ejecutando...";
+                <p id="status-concurrente" class="estado">Esperando...</p>
 
-            const inicio = performance.now();
+                <h3>Progreso</h3>
+                <div class="barra-fondo">
+                    <div id="bar-concurrente" class="barra"></div>
+                </div>
 
-            await Promise.all([
-                tareaDeEspera(),
-                tareaDeEspera(),
-                tareaDeEspera(),
-                tareaDeEspera()
-            ]);
+                <p>Consultas a la API: <span id="net-concurrente">0%</span></p>
+                <p>Cálculos matemáticos: <span id="cpu-concurrente">0%</span></p>
+            </article>
 
-            const tiempo = (performance.now() - inicio) / 1000;
-            salida.textContent = `Tiempo total: ${tiempo.toFixed(2)} segundos`;
-        }
+            <!-- EJECUCIÓN PARALELA -->
+            <article class="tarjeta paralelo">
+                <h2>3. Paralelo</h2>
+                <p>Se utilizan Web Workers para ejecutar tareas en hilos separados.</p>
 
-        // Código que ejecutará cada trabajador paralelo.
-        const codigoTrabajador = `
-            self.onmessage = function(event) {
-                const iteraciones = event.data;
-                let resultado = 0;
+                <button id="btn-paralelo"
+                        onclick="ejecutarParalelo()">
+                    Ejecutar paralelo
+                </button>
 
-                for (let i = 0; i < iteraciones; i++) {
-                    resultado += Math.sqrt(i);
-                }
+                <p id="status-paralelo" class="estado">Esperando...</p>
 
-                self.postMessage(resultado);
-            };
-        `;
+                <h3>Progreso</h3>
+                <div class="barra-fondo">
+                    <div id="bar-paralelo" class="barra"></div>
+                </div>
 
-        // 3. PARALELISMO CON WEB WORKERS
-        async function paralelo() {
-            const salida = document.getElementById("resultadoParalelo");
-            salida.textContent = "Ejecutando cálculos...";
+                <p>Consultas a la API: <span id="net-paralelo">0%</span></p>
+                <p>Cálculos matemáticos: <span id="cpu-paralelo">0%</span></p>
+            </article>
+        </section>
 
-            const inicio = performance.now();
-            const cantidad = 4;
-            const iteraciones = 10_000_000;
+        <!-- RESULTADOS -->
+        <section class="resultados">
+            <h2>Resultados de las ejecuciones</h2>
 
-            const blob = new Blob(
-                [codigoTrabajador],
-                { type: "text/javascript" }
-            );
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Modalidad</th>
+                            <th>Consultas a la API</th>
+                            <th>Resultado del cálculo</th>
+                            <th>Tiempo total</th>
+                        </tr>
+                    </thead>
 
-            const url = URL.createObjectURL(blob);
-            const trabajadores = [];
+                    <tbody>
+                        <tr>
+                            <td>Secuencial</td>
+                            <td id="netresult-secuencial">Pendiente</td>
+                            <td id="cpuresult-secuencial">Pendiente</td>
+                            <td id="time-secuencial">--</td>
+                        </tr>
 
-            try {
-                const tareas = Array.from({ length: cantidad }, () => {
-                    return new Promise((resolve, reject) => {
-                        const trabajador = new Worker(url);
-                        trabajadores.push(trabajador);
+                        <tr>
+                            <td>Concurrente</td>
+                            <td id="netresult-concurrente">Pendiente</td>
+                            <td id="cpuresult-concurrente">Pendiente</td>
+                            <td id="time-concurrente">--</td>
+                        </tr>
 
-                        trabajador.onmessage = event => {
-                            trabajador.terminate();
-                            resolve(event.data);
-                        };
+                        <tr>
+                            <td>Paralelo</td>
+                            <td id="netresult-paralelo">Pendiente</td>
+                            <td id="cpuresult-paralelo">Pendiente</td>
+                            <td id="time-paralelo">--</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-                        trabajador.onerror = error => {
-                            trabajador.terminate();
-                            reject(error);
-                        };
+        <!-- REGISTRO DE EVENTOS -->
+        <section class="registro">
+            <div class="registro-cabecera">
+                <h2>Registro de eventos</h2>
+                <button class="boton-secundario" onclick="limpiarLog()">
+                    Limpiar registro
+                </button>
+            </div>
 
-                        trabajador.postMessage(iteraciones);
-                    });
-                });
+            <ul id="log">
+                <li>La aplicación está lista para comenzar.</li>
+            </ul>
+        </section>
+    </main>
 
-                await Promise.all(tareas);
+    <footer>
+        <p>Demostración educativa de concurrencia y paralelismo con JavaScript.</p>
+    </footer>
 
-                const tiempo = (performance.now() - inicio) / 1000;
-
-                salida.textContent =
-                    `Cuatro cálculos completados en ${tiempo.toFixed(2)} segundos.`;
-            } catch (error) {
-                salida.textContent =
-                    "No se pudo completar la prueba: " + error.message;
-            } finally {
-                trabajadores.forEach(trabajador => trabajador.terminate());
-                URL.revokeObjectURL(url);
-            }
-        }
-    </script>
+    <!-- Cargar los archivos JavaScript en este orden -->
+    <script src="js/interfaz.js"></script>
+    <script src="js/consultas.js"></script>
+    <script src="js/calculos.js"></script>
+    <script src="js/principal.js"></script>
 
 </body>
 </html>
