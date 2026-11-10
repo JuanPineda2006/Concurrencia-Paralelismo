@@ -1,4 +1,4 @@
-const POKEMON = ["pikachu", "charizard", "bulbasaur", "mewtwo", "greninja"];
+const POKEMON = ["pikachu", "charizard", "bulbasaur", "squirtle", "gengar", "lucario", "mewtwo", "greninja"];
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon/";
 
@@ -130,7 +130,7 @@ function consultasEnWorkers(modo) {
         });
     });
 
-    return Promise.all(promesas)
+    return Promise.all(promesas.map(p => p.catch(() => null)))
         .then((resultados) => {
             actualizarPorcentaje(modo, "net", 100);
             return resultados;

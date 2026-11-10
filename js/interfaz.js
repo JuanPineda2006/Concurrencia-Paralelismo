@@ -67,7 +67,10 @@ function finalizar(modo, inicio, datos, resultadoCPU) {
 
     estado(modo, "Finalizado correctamente");
 
-    document.getElementById(`netresult-${modo}`).textContent =`${datos.length} de ${POKEMON.length} consultas completadas`;
+    const exitosas = datos.filter(dato => dato !== null).length;
+    const fallidas = datos.length - exitosas;
+
+    document.getElementById(`netresult-${modo}`).textContent = `${exitosas} exitosas / ${fallidas} fallidas`;
 
     document.getElementById(`cpuresult-${modo}`).textContent = resultadoCPU.toLocaleString("es-CO", {maximumFractionDigits: 2});
 
