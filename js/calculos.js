@@ -8,7 +8,7 @@ function calcularSecuencial(modo) {
     log("Iniciando cálculo matemático secuencial.", "calculo");
 
     for (let i = 1; i <= TOTAL; i++) {
-        suma += Math.sqrt(i);
+        suma += Math.pow(i, 2);
     }
 
     actualizarPorcentaje(modo, "cpu", 100);
@@ -29,7 +29,7 @@ function calcularEnWorker(modo, cantidadWorkers) {
             let suma = 0;
 
             for (let i = inicio; i <= fin; i++) {
-                suma += Math.sqrt(i);
+                suma += Math.pow(i, 2);
             }
 
             self.postMessage(suma);
