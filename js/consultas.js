@@ -1,4 +1,4 @@
-const POKEMON = ["pikachu", "charizard", "bulbasaur", "squirtle", "gengarthd", "lucario", "mewtwo", "greninja"];
+const POKEMON = ["pikachu", "charizard", "bulbasaur", "squirtle", "gengar", "lucario", "mewtwo", "greninja"];
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon/";
 
