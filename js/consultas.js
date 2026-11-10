@@ -1,4 +1,4 @@
-const POKEMON = ["pikachu", "charizard", "bulbasaur", "squirtle", "gengar", "lucario", "mewtwo", "greninja"];
+const POKEMON = ["pikachu", "charizard", "bulbasaur", "squirtle", "gengarthd", "lucario", "mewtwo", "greninja"];
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon/";
 
@@ -19,18 +19,13 @@ async function consultar(nombre) {
 async function consultarTodosSecuencial(modo) {
     const resultados = [];
 
-    for (let i = 0; i < POKEMON.length; i++) {
-        const nombre = POKEMON[i];
-
-        log(`Consultando a ${nombre}...`, "red");
-
-        const resultado = await consultar(nombre); 
-        
-        resultados.push(resultado);
-
-        actualizarPorcentaje(modo,"net",((i + 1) / POKEMON.length) * 100);
-
-        log(`Consulta de ${nombre} completada.`, "exito");
+    for (const nombre of POKEMON) {
+        try {
+            resultados.push(await consultar(nombre));
+        } catch (error) {
+            resultados.push(null);
+        }
+        actualizarPorcentaje(modo, "net", (resultados.length/POKEMON.length) * 100);
     }
 
     return resultados;
@@ -39,21 +34,20 @@ async function consultarTodosSecuencial(modo) {
 //Consultas concurrentes
 
 async function consultarTodosConcurrente(modo) {
+    let completadas = 0;
+
     const solicitudes = POKEMON.map(async (nombre) => {
-        log(`Iniciando consulta de ${nombre}...`, "red");
-
-        const resultado = await consultar(nombre);
-
-        log(`Respuesta recibida de ${nombre}.`, "exito");
-
-        return resultado;
+        try {
+            return await consultar(nombre);
+        } catch (error) {
+            return null;
+        } finally {
+            completadas++;
+            actualizarPorcentaje(modo, "net", (completadas / POKEMON.length) * 100);
+        }
     });
 
-    const resultados = await Promise.all(solicitudes);
-
-    actualizarPorcentaje(modo, "net", 100);
-
-    return resultados;
+    return await Promise.all(solicitudes);
 }
 
 //Consultas mediante Web Workersd 
