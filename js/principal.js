@@ -64,7 +64,7 @@ async function ejecutarParalelo() {
 
         const promesaConsultas = consultasEnWorkers(modo);
 
-        const promesaCalculo = calcularEnWorker(modo, 7);
+        const promesaCalculo = calcularEnWorker(modo, 4);
 
         const [datos, resultadoCPU] = await Promise.all([promesaConsultas, promesaCalculo]);
 
